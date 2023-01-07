@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,8 +31,6 @@ import static com.dongpop.urin.global.error.errorcode.StudyErrorCode.STUDY_DOES_
 @Service
 public class InquiryService {
 
-    private static final String DELETE_MESSAGE = "삭제된 댓글입니다.";
-
     private final InquiryRepository inquiryRepository;
     private final StudyRepository studyRepository;
 
@@ -47,28 +44,12 @@ public class InquiryService {
         List<InquiryDto> inquiryList = new ArrayList<>();
 
         inquiryPage.toList().forEach(i -> {
-            InquiryDetailDto parent = InquiryDetailDto.builder()
-                    .inquiryId(i.getId())
-                    .contents(i.isDeleted() ? DELETE_MESSAGE : i.getContents())
-                    .writerId(i.getWriter().getId())
-                    .writer(i.getWriter().getNickname())
-                    .createdAt(i.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
-                    .isDeleted(i.isDeleted()).build();
-
+            InquiryDetailDto parent = InquiryDetailDto.toDto(i);
             List<InquiryDetailDto> children = i.getChildren().stream()
-                    .map(c ->
-                            InquiryDetailDto.builder()
-                                    .inquiryId(c.getId())
-                                    .contents(c.isDeleted() ? DELETE_MESSAGE : c.getContents())
-                                    .writerId(c.getWriter().getId())
-                                    .writer(c.getWriter().getNickname())
-                                    .createdAt(c.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")))
-                                    .isDeleted(c.isDeleted()).build()
-                    ).collect(Collectors.toList());
-
+                    .map(InquiryDetailDto::toDto)
+                    .collect(Collectors.toList());
             inquiryList.add(new InquiryDto(parent, children));
         });
-
         return new InquiryListDto(totalPages, inquiryList);
     }
 

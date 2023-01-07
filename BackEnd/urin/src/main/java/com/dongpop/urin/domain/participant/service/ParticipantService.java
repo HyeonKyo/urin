@@ -51,7 +51,7 @@ public class ParticipantService {
 
         List<Participant> participants = study.getParticipants();
         for (Participant participant : participants) {
-            if (isRegisted(participant, member)) {
+            if (isRegistered(participant, member)) {
                 return new ParticipantIdDto(participant.getId());
             }
         }
@@ -79,13 +79,13 @@ public class ParticipantService {
 
     private void checkAlreadyRegistered(Member member, Study study) {
         for (Participant participant : study.getParticipants()) {
-            if (isRegisted(participant, member)) {
+            if (isRegistered(participant, member)) {
                 throw new CustomException(ALREADY_REGISTERED_MEMBER);
             }
         }
     }
 
-    private boolean isRegisted(Participant participant, Member member) {
+    private boolean isRegistered(Participant participant, Member member) {
         return !participant.getWithdrawal() && participant.getMember().getId() == member.getId();
     }
 

@@ -19,4 +19,8 @@ public class FeedDataDto {
     @NotBlank(message = "내용을 입력해주세요.")
     @Size(min=1)
     private String contents;
+
+    public boolean isChildFeed() {
+        return parent != 0;
+    }
 }

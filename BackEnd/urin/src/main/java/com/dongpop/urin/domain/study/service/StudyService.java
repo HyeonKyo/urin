@@ -61,7 +61,6 @@ public class StudyService {
                         study.getId(), study.getExpirationDate(), LocalDate.now());
                 study.updateStatus(TERMINATED);
             }
-
         });
     }
     /**
@@ -84,17 +83,8 @@ public class StudyService {
                     List<String> hashtagNameList = new ArrayList<>();
                     String hashtagCodes = makeHashtagResponse(s, hashtagNameList);
 
-                    return StudySummaryDto.builder()
-                            .id(s.getId())
-                            .memberCapacity(s.getMemberCapacity())
-                            .title(s.getTitle())
-                            .currentMember(s.getCurrentParticipantCount())
-                            .status(s.getStatus())
-                            .hashtagCodes(hashtagCodes)
-                            .hashtagNameList(hashtagNameList)
-                            .build();
+                    return StudySummaryDto.toDto(s, hashtagNameList, hashtagCodes);
                 }).collect(Collectors.toList());
-
         return new StudyListDto(pages.getTotalPages(), studyList);
     }
 
@@ -104,19 +94,11 @@ public class StudyService {
     @Transactional
     public StudyDetailDto getStudyDetail(int studyId) {
         Study study = getStudy(studyId);
-
         List<ParticipantDto> participants = study.getParticipants().stream()
                 .filter((p) -> !p.getWithdrawal())
-                .map(p -> ParticipantDto.builder()
-                            .id(p.getId())
-                            .memberId(p.getMember().getId())
-                            .nickname(p.getMember().getNickname())
-                            .isLeader(p.isLeader())
-                            .build()).collect(Collectors.toList());
-
-        int dDay = (int) Duration.between(LocalDate.now().atStartOfDay(),
-                study.getExpirationDate().atStartOfDay()).toDays();
-        dDay = dDay > 36500 ? -1 : dDay;
+                .map(ParticipantDto::toDto)
+                .collect(Collectors.toList());
+        int dDay = findDDay(study);
 
         List<String> hashtagNameList = new ArrayList<>();
         String hashtagCodes = makeHashtagResponse(study, hashtagNameList);
@@ -171,15 +153,6 @@ public class StudyService {
         });
 
         return new MeetingIdResponseDto(idList);
-    }
-
-    private boolean checkEnrolledMember(Study study, Member member) {
-        for (Participant participant : study.getParticipants()) {
-            if (participant.getMember().getId() == member.getId()) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -246,6 +219,22 @@ public class StudyService {
         }
         study.updateStatus(status);
         return new StudyStatusDto(studyId, status.name());
+    }
+
+    private int findDDay(Study study) {
+        int dDay = (int) Duration.between(LocalDate.now().atStartOfDay(),
+                study.getExpirationDate().atStartOfDay()).toDays();
+        dDay = dDay > 36500 ? -1 : dDay;
+        return dDay;
+    }
+
+    private boolean checkEnrolledMember(Study study, Member member) {
+        for (Participant participant : study.getParticipants()) {
+            if (participant.getMember().getId() == member.getId()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Study getStudy(int studyId) {
@@ -325,6 +314,5 @@ public class StudyService {
             }
         }
     }
-
 
 }

@@ -88,7 +88,6 @@ public class AnalysisService {
     @Transactional
     public Map<String, AnalysisCacheDto> getPassDataCache() {
         if (passDataCache.isEmpty()) {
-            //TODO: 쿼리 확인
             List<AnalysisData> passIntervieweeData = analysisRepository.findAllPassedInterviewee();
             calculateDataList(passIntervieweeData);
         }

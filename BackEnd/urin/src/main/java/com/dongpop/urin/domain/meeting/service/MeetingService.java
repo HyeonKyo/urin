@@ -63,10 +63,9 @@ public class MeetingService {
         if (!meetingCreateDto.getSessionId().equals(study.getSessionId())) {
             throw new CustomException(SESSIONID_IS_NOT_VALID);
         }
-        //TODO: 테스트를 쉽게 하기 위해 예외를 열어둠.
-//        if (study.getIsOnair()) {
-//            throw new CustomException(MEETING_IS_ALREADY_ONAIR);
-//        }
+        if (study.getIsOnair()) {
+            throw new CustomException(MEETING_IS_ALREADY_ONAIR);
+        }
 
         Meeting meeting = new Meeting(study);
         if (study.getStudyLeader().getId() == member.getId()) {

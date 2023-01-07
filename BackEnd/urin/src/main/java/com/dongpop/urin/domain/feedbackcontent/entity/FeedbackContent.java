@@ -40,4 +40,8 @@ public class FeedbackContent {
             feedback.getFeedbackContents().add(this);
         }
     }
+
+    public boolean isTechType() {
+        return FeedbackContentType.TECH.equals(type);
+    }
 }

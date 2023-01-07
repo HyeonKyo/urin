@@ -1,5 +1,6 @@
 package com.dongpop.urin.domain.participant.dto.response;
 
+import com.dongpop.urin.domain.participant.entity.Participant;
 import lombok.Builder;
 import lombok.Data;
 
@@ -18,4 +19,13 @@ public class ParticipantDto {
     private String nickname;
     @NotNull
     private Boolean isLeader;
+
+    public static ParticipantDto toDto(Participant participant) {
+        return ParticipantDto.builder()
+                .id(participant.getId())
+                .memberId(participant.getMember().getId())
+                .nickname(participant.getMember().getNickname())
+                .isLeader(participant.isLeader())
+                .build();
+    }
 }

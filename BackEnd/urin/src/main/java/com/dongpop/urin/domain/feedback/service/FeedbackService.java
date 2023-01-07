@@ -42,10 +42,6 @@ public class FeedbackService {
         Meeting meeting = getMeeting(meetingId);
         Member interviewee = getMember(intervieweeId);
 
-//        if (interviewee.getId() == interviewer.getId()) {
-//            throw new CustomException(CAN_NOT_BE_THE_SAME);
-//        }
-
         Feedback feedback = feedbackRepository.findByMeetingAndInterviewerAndInterviewee(meeting, interviewer, interviewee)
                 .orElseThrow(() -> new CustomException(FEEDBACK_IS_NOT_EXIST));
         return makeResponseDto(feedback);
@@ -56,10 +52,9 @@ public class FeedbackService {
         Meeting meeting = getMeeting(meetingId);
         Member interviewee = getMember(intervieweeId);
 
-        //TODO: 테스트를 위해 유효성 검사를 꺼두었음.
-//        if (interviewee.getId() == interviewer.getId()) {
-//            throw new CustomException(CAN_NOT_BE_THE_SAME);
-//        }
+        if (interviewee.getId() == interviewer.getId()) {
+            throw new CustomException(CAN_NOT_BE_THE_SAME);
+        }
 
         checkAuthorization(meeting, interviewer, interviewee);
 
@@ -126,13 +121,16 @@ public class FeedbackService {
                     .question(feedbackContent.getQuestion())
                     .answer(feedbackContent.getAnswer()).build();
 
-            if (TECH.equals(feedbackContent.getType())) {
-                techList.add(dataDto);
-            } else {
-                personalityList.add(dataDto);
-            }
+            List<FeedbackDataDto> list = findAddList(techList, personalityList, feedbackContent);
+            list.add(dataDto);
         }
-
         return new FeedbackResponseDto(techList, personalityList);
+    }
+
+    private List<FeedbackDataDto> findAddList(List<FeedbackDataDto> techList, List<FeedbackDataDto> personalityList, FeedbackContent feedbackContent) {
+        if (feedbackContent.isTechType()) {
+            return techList;
+        }
+        return personalityList;
     }
 }
